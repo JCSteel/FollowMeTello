@@ -1,0 +1,23 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31410.357
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "FollowMeTello", "FollowMeTello.pyproj", "{5783716D-1DB8-44E4-A4D7-A2FB02A99B3A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{5783716D-1DB8-44E4-A4D7-A2FB02A99B3A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5783716D-1DB8-44E4-A4D7-A2FB02A99B3A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {431495F6-2F0C-4E87-A591-81EF47209DD6}
+	EndGlobalSection
+EndGlobal
