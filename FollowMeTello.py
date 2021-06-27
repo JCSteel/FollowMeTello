@@ -4,6 +4,7 @@ me = Tello()
 #me.connect()
 #me.streamon()
 #me.get_frame_read()
+desiredFaceWidth = 256
 
 
 import cv2 as cv
@@ -26,8 +27,12 @@ def repositionDrone(cap):
     faces = face_cascade.detectMultiScale(frame_gray)
     vid = (cap.get(cv.CAP_PROP_FRAME_WIDTH)/2, cap.get(cv.CAP_PROP_FRAME_HEIGHT)/2)
     center = (vid)
+    avgWidth = 0
     for (x,y,w,h) in faces:
         center = (x+w//2, y+h//2)
+    for (w) in faces:
+        avgWidth = max(w)
+    
     print(center)
     if (center[0] > vid[0]):
         #me.move_right(20)
@@ -36,11 +41,19 @@ def repositionDrone(cap):
         #me.move_left(20)
         print("moving left")
     if (center[1] > vid[1]):
-        #me.move_left(20)
+        #me.move_down(20)
         print("moving down")
     if (center[1] < vid[1]):
-        #me.move_left(20)
+        #me.move_up(20)
         print("moving up")
+    if (avgWidth > desiredFaceWidth):
+        #me.move_backward(20)
+        print("moving back")
+        print(avgWidth)
+    if (avgWidth < desiredFaceWidth):
+        #me.move_forward(20)
+        print("moving forward")
+        print(avgWidth)
 
 parser = argparse.ArgumentParser(description='Code for Cascade Classifier tutorial.')
 parser.add_argument('--face_cascade', help='Path to face cascade.', default='D:\Program Files (x86)\OpenCV\opencv\sources\data\haarcascades/haarcascade_frontalface_alt.xml')
