@@ -1,25 +1,35 @@
 from djitellopy import Tello
+import cv2 as cv
+import numpy as np
+import argparse
+import dlib
 
 me = Tello()
 #me.connect()
 #me.streamon()
 #me.get_frame_read()
 desiredFaceWidth = 256
+detector = dlib.get_frontal_face_detector()
+predictor = dlib.shape_predictor("lbfmodel.dat")
 
 
-import cv2 as cv
-import numpy as np
-import argparse
-
-def detectAndDisplay(frame):
+def detectAndDisplay(frame, cap):
     frame_gray = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
     frame_gray = cv.equalizeHist(frame_gray)
-
+    resize = cv.resize(frame, (320,180))
+    gray = cv.cvtColor(resize, cv.COLOR_BGR2GRAY)
+    dlibFaces = detector(gray)
     faces = face_cascade.detectMultiScale(frame_gray)
     for (x,y,w,h) in faces:
         frame = cv.rectangle(frame, (x,y), (x+w,y+h), (255,0,255))
+        rect = cv.rectangle(frame, (x,y), (x+w,y+h), (255,0,255))
         faceROI = frame_gray[y:y+h, x:x+w]
+    for face in dlibFaces:
+      points = predictor(gray, face)
+      for n in range(68):
+           frame = cv.circle(frame, (points.part(n).x*4, points.part(n).y*4), 5, (50,50,255), cv.FILLED)
     cv.imshow('Capture  - Face detection', frame)
+
 
 def repositionDrone(cap):
     frame_gray = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
@@ -79,7 +89,7 @@ while True:
     if not ret:
         print("Can't rexceive frame. Exiting.")
         break
-    detectAndDisplay(frame)
+    detectAndDisplay(frame, cap)
     repositionDrone(cap)
     if cv.waitKey(1) == ord('q'):
         break
