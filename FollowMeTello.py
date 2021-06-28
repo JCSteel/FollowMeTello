@@ -13,23 +13,24 @@ detector = dlib.get_frontal_face_detector()
 predictor = dlib.shape_predictor("lbfmodel.dat")
 
 
-def detectAndDisplay(frame, cap):
+def detectAndDisplay(frame):
     frame_gray = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
     frame_gray = cv.equalizeHist(frame_gray)
-    resize = cv.resize(frame, (320,180))
-    gray = cv.cvtColor(resize, cv.COLOR_BGR2GRAY)
-    dlibFaces = detector(gray)
     faces = face_cascade.detectMultiScale(frame_gray)
     for (x,y,w,h) in faces:
         frame = cv.rectangle(frame, (x,y), (x+w,y+h), (255,0,255))
-        rect = cv.rectangle(frame, (x,y), (x+w,y+h), (255,0,255))
         faceROI = frame_gray[y:y+h, x:x+w]
+    cv.imshow('Capture  - Face detection', frame)
+
+def displayLandmarks(frame):
+    resize = cv.resize(frame, (320,180))
+    gray = cv.cvtColor(resize, cv.COLOR_BGR2GRAY)
+    dlibFaces = detector(gray)
     for face in dlibFaces:
       points = predictor(gray, face)
       for n in range(68):
            frame = cv.circle(frame, (points.part(n).x*4, points.part(n).y*4), 5, (50,50,255), cv.FILLED)
     cv.imshow('Capture  - Face detection', frame)
-
 
 def repositionDrone(cap):
     frame_gray = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
@@ -89,7 +90,8 @@ while True:
     if not ret:
         print("Can't rexceive frame. Exiting.")
         break
-    detectAndDisplay(frame, cap)
+    detectAndDisplay(frame)
+    displayLandmarks(frame)
     repositionDrone(cap)
     if cv.waitKey(1) == ord('q'):
         break
