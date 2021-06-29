@@ -1,34 +1,44 @@
 from djitellopy import Tello
+from threading import Thread
 import cv2 as cv
 import numpy as np
 import argparse
 import dlib
 
-me = Tello()
+#me = Tello()
 #me.connect()
+#x = me.get_battery()
+#print(x)
+#me.takeoff()
+#me.move_up(75)
 #me.streamon()
-#me.get_frame_read()
+#frame_reader = me.get_frame_read()
 desiredFaceWidth = 256
 detector = dlib.get_frontal_face_detector()
 predictor = dlib.shape_predictor("lbfmodel.dat")
+#capCenter = (960/2, 720/2)
+capCenter = (1280/2, 720/2)
 
 
 #Detects and displays a box around faces
 def detectAndDisplay(frame):
+    location = 0,0,0,0
     frame_gray = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
     frame_gray = cv.equalizeHist(frame_gray)
     faces = face_cascade.detectMultiScale(frame_gray)
     #For each detected face, draw a box around it.
     for (x,y,w,h) in faces:
+        location = x,y,w,h
         frame = cv.rectangle(frame, (x,y), (x+w,y+h), (255,0,255))
         faceROI = frame_gray[y:y+h, x:x+w]
     cv.imshow('Capture  - Face detection', frame)
+    return location
 
 #Detects and displays the facial landmarks
 #Will be necessary for pose estimation
 def displayLandmarks(frame):
     #Resizing the video feed for the sake of dlib optimization
-    resize = cv.resize(frame, (320,180))
+    resize = cv.resize(frame, (240,180))
     gray = cv.cvtColor(resize, cv.COLOR_BGR2GRAY)
     dlibFaces = detector(gray)
     #For each detected face, draw circles on all landmarks.
@@ -36,44 +46,37 @@ def displayLandmarks(frame):
       points = predictor(gray, face)
       for n in range(68):
            frame = cv.circle(frame, (points.part(n).x*4, points.part(n).y*4), 5, (50,50,255), cv.FILLED)
-    cv.imshow('Capture  - Landmark detection', frame)
+    cv.imshow('Capture  - Face detection', frame)
 
-#Used to calculate where the drone is respective
-#to the face in 3D space.
-def repositionDrone(cap):
-    frame_gray = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
-    frame_gray = cv.equalizeHist(frame_gray)
-    faces = face_cascade.detectMultiScale(frame_gray)
+
+def repositionDroneX(pos):
     #Finds the center of the frame capture
-    capCenter = (cap.get(cv.CAP_PROP_FRAME_WIDTH)/2, cap.get(cv.CAP_PROP_FRAME_HEIGHT)/2)
-    center = (capCenter)
-    width = 0
-    #Finds the center of the face capture
-    #along with it's respective width
-    for (x,y,w,h) in faces:
-        center = (x+w//2, y+h//2)
-    for (w) in faces:
-        width = max(w)
-    
+    center = location[0]+location[2]//2
     #Moves the drone in the necessary direction
-    if (center[0] > capCenter[0]):
+    if ((center > capCenter[0]+100) & (location[2] != 0)):
         #me.move_right(20)
         print("moving right")
-    if (center[0] < capCenter[0]):
+    if ((center < capCenter[0]-100) & (location[2] != 0)):
         #me.move_left(20)
         print("moving left")
-    if (center[1] > capCenter[1]):
-        #me.move_down(20)
-        print("moving down")
-    if (center[1] < capCenter[1]):
+
+def repositionDroneY(pos):
+    center = pos[1]+pos[3]//2
+    if ((center < capCenter[1]-150) & (location[3] != 0)):
         #me.move_up(20)
         print("moving up")
-    if (width > desiredFaceWidth):
-        #me.move_backward(20)
+    if ((center > capCenter[1]+75) & (location[3] != 0)):
+        #me.move_down(20)
+        print("moving down")
+
+def repositionDroneZ(pos):
+    if ((pos[2] > desiredFaceWidth+150) & (location[2] != 0)):
+        #me.move_back(20)
         print("moving back")
-    if (width < desiredFaceWidth):
+    if ((pos[2] < desiredFaceWidth-150) & (location[2] != 0)):
         #me.move_forward(20)
         print("moving forward")
+
 
 #Parsing the haarcascade
 parser = argparse.ArgumentParser(description='Code for Cascade Classifier tutorial.')
@@ -95,17 +98,28 @@ if not cap.isOpened():
     print("Cannot open camera")
     exit()
 while True:
+    location = 0,0,0,0
     ret, frame = cap.read()
+    #if not frame_reader:
     if not ret:
         print("Can't receive frame. Exiting.")
         break
-    detectAndDisplay(frame)
-    displayLandmarks(frame)
-    repositionDrone(cap)
+    location = detectAndDisplay(frame)
+    #location = detectAndDisplay(frame_reader.frame)
+    #displayLandmarks(frame_reader.frame)
+    #detectAndDisplay(frame)
+    #displayLandmarks(frame)
+    x = Thread(repositionDroneX(location))
+    y = Thread(repositionDroneY(location))
+    z = Thread(repositionDroneZ(location))
+    x.start()
+    y.start()
+    z.start()
+
     if cv.waitKey(1) == ord('q'):
         break
-
 cap.release()
+#me.streamoff()
 cv.destroyAllWindows()
 
 

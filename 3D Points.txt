@@ -1,0 +1,15 @@
+modelPoints.push_back(cv::Point3f(2.37427,110.322,21.7776));    // l eye (v 314)
+modelPoints.push_back(cv::Point3f(70.0602,109.898,20.8234));    // r eye (v 0)
+modelPoints.push_back(cv::Point3f(36.8301,78.3185,52.0345));    //nose (v 1879)
+modelPoints.push_back(cv::Point3f(14.8498,51.0115,30.2378));    // l mouth (v 1502)
+modelPoints.push_back(cv::Point3f(58.1825,51.0115,29.6224));    // r mouth (v 695)
+modelPoints.push_back(cv::Point3f(-61.8886f,127.797,-89.4523f));  // l ear (v 2011)
+modelPoints.push_back(cv::Point3f(127.603,126.9,-83.9129f));     // r ear (v 1138)
+
+https://stackoverflow.com/a/36591123/3051961
+
+To do:
+figure out which points on the 2D list correspond to the 3d points above
+figure out the camera intrinsic matrix
+
+https://docs.opencv.org/master/d7/d53/tutorial_py_pose.html
